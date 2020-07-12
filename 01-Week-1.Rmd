@@ -1,0 +1,26 @@
+---
+title: "Week 1 -- SQL for Data Science"
+description: |
+  Notes and Exercises for the _SQL for Data Science_ course.
+author:
+  - name: Alexis Solis
+    url: alexis.solisc@gmail.com  
+    # affiliation: Spacely Sprockets
+    # affiliation_url: https://example.com/spacelysprokets
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+
+
+
+## Data Models Part 3: Relations vs. Transactional Models
+
