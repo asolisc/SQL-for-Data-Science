@@ -1,0 +1,305 @@
+---
+title: "Week 2 -- SQL for Data Science"
+description: |
+  Notes and Exercises for the _SQL for Data Science_ course.
+author:
+  - name: Alexis Solis
+    url: alexis.solisc@gmail.com  
+    # affiliation: Spacely Sprockets
+    # affiliation_url: https://example.com/spacelysprokets
+date: "`r Sys.Date()`"
+output: distill::distill_article
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  message = FALSE,
+  warning = FALSE
+)
+```
+
+
+
+
+# 01. Basics of Filtering with SQL
+
+
+```{sql connection=}
+SELECT ProductName
+
+FROM Products
+WHERE UnitPrice >= 75;
+
+```
+
+
+```{sql connection=}
+SELECT ProductName
+
+FROM Products
+WHERE UnitPrice BETWEEN 75 AND 80;
+```
+
+
+
+```{sql connection=}
+SELECT ProductName
+
+FROM Products
+WHERE UnitPrice IS NULL;
+```
+
+
+
+# 02. Advanced Filtering: IN, OR, and NOT
+
+
+
+IN operator is enclosed in "()" and you specify conditions.
+
+
+```{sql connection=}
+SELECT
+Product Id,
+Unit Price,
+SupplierId
+
+FROM Products
+
+WHERE SupplierID IN (9, 10, 11, 'twenty');
+```
+
+String values for the IN statement need to be in single quotations.
+
+DataBase Management Systems will not evaluate the second condition in a WHERE clause if the first condition is met. So for example, in the code below...
+
+```{sql connection=}
+
+SELECT
+
+Product Id,
+Unit Price,
+SupplierId
+
+FROM Products
+
+WHERE ProductName = 'Tofu' OR 'Konbu';
+--this will only give me results for 'Tofu' if it finds them.
+
+/*
+If you want to get both, you should use the AND clause.
+*/
+```
+
+
+The IN clause is better because it executes faster, you can use another SELECT subquery, and also, you can have multiple conditions. Using OR doesn't have any of these advantages.
+
+
+When using the WHERE and AND clause, you need to use parenthesis. SQL processes AND before OR.
+
+
+NOT operator: the use of this one is pretty straightforward.
+
+
+# 03. Using Wildcards in SQL
+
+Wildecards: special character used to match parts of a value (e.g. regex).. Uses `LIKE` as an operator.
+
+To use a wildcard, you'll use `LIKE` + `%` before, after, or in between a string.
+
+Another wildcard is `_`, which matches a single character.
+
+
+There's also a `[]` wildcard, but SQLite doesn't support it.
+
+Warning: wildcards take longer to run - so it's better to use another operator (if possible).
+
+#04. Sorting with ORDER BY
+
+```{sql connection=}
+SELECT something
+FROM database_example
+ORDER BY 
+-- you can order by multiple columns but make sure you add a column after that.
+```
+
+`ORDER BY` should always be the last clause in the `SELECT` statement. Importantly, you can order by a variable that you didn't retrieve with the `SELECT` statement.
+
+
+You can also sort by column position or by names of the columns:
+
+```{sql connection=}
+
+SELECT products
+FROM products_table
+ORDER BY 2,3
+
+--DESC: descending order
+--ASC: ascending order
+-- you have to specify the ascending/descending order for each column that you're ordering by.
+```
+
+By default `ORDER BY` sorts the data in ascending order.
+
+
+
+# 0.5 Math Operators
+
+
+Here, I have my units and order times unit price. And then, I'm using an alias, `AS`, for what I want this new column to be named, and this is going to be the total order cost.
+
+```{sql connection=}
+SELECT
+ProductID,
+Quantity,
+UnitPrice,
+Discount,
+
+-- here we're using math operators
+(UnitPrice - Discount) / Quantity AS Total_Cost
+
+FROM OrderDetails;
+```
+
+# 0.6 Aggregate functions
+
+Aggregate functions provide various ways to summarize your data, which in turn really helps you to analyze your data and see what you have.
+
+
+You need to learn how to use various aggregate functions including `AVG()`, `COUNT()`, `MIN()`, `MAX()`, and `SUM()` to summarize and analyze data.
+
+
+
+In this example, for average we'll use our select statement. And then just as we will list out our columns that we want to retrieve, you're going to list it out as a column you want to retrieve. But before you put your column, you're going to go in and add the function that you want. In this case, I have AVG because I want the average unit price. For this statement I'm also going to add my alias to rename this column because I'm not just going to pull in the unit price. 
+
+
+
+```{sql connection=}
+
+SELECT AVG(UnitPrice) AS avg_price
+FROM products
+
+```
+
+
+Something to note here is that rows containing no or null values will be ignored by the average function.
+
+Count functions: to get idea of the contents of a table.
+
+If you do a COUNT with a star and brackets, you're going to count all the rows in a table. And this could be all the values or no values because this is just counting any row in a table. You could also then count an individual column just by selecting count and then the column name. This will then count the rows for that specific column and would ignore the null values.
+
+
+Counting all rows in a table, including NULL values:
+
+```{sql connection=}
+SELECT COUNT (*) AS total_customers
+FROM Customers;
+```
+
+
+Counting all rows in a specific column, ignoring NULL values:
+
+```{sql connection=}
+SELECT COUNT(CustomerID) AS total_customers
+FROM Customers;
+```
+
+
+Max and Min functions:
+
+
+```{sql connection=}
+
+SELECT MAX(UnitPrice) AS max_prod_price
+FROM Products;
+
+-- or...
+
+SELECT MIN(UnitPrice) AS min_prod_price
+FROM Products;
+```
+NULL values will be ignored.
+
+
+Sum function:
+
+```{sql connection=}
+SELECT SUM(UnitPrice) AS total_prod_price
+FROM products
+WHERE SupplierID = 23;
+```
+
+
+
+Distinct function:
+
+```{sql connection=}
+SELECT COUNT(DISTINCT CustomerID)
+FROM Customers;
+```
+
+You can't use `DISTINCT` in a `COUNT(*)` call.
+
+
+# 0.7 Grouping Data with SQL
+
+
+This is about the HAVING and GROUP BY calls.
+
+If we were to just have our select statement with select region and then we have our aggregate function count customer IDs as total customers from the customers table, we're going to get an error return. 
+
+```{sql connection=}
+SELECT Region,
+COUNT(CustomerID) AS total_customers
+FROM Customers
+
+-- here we'll add how to group by in order for the COUNT call to work:
+GROUP BY Region;
+```
+
+
+Some important things to note about the GROUP BYs is we can group it by multiple columns. We may have more columns than just region.
+
+
+One of the things to note that's really important is all of the fields that your pulling in with the aggregate function need to be on your GROUP BY clause, except for the aggregated calculation. Another thing to note is that NULLs will be grouped as its own category if your GROUP BY column contains NULLs.
+
+```{sql connection=}
+
+
+
+```
+
+WHERE does not work for groups because it filters on rows, therefore we need the HAVING clause.
+
+```{sql connection=}
+SELECT CustomerID, COUNT (*) AS orders
+FROM Orders
+GROUP BY CustomerID
+HAVING COUNT (*) >= 2;
+
+```
+
+WHERE filters **before** the data is grouped because it filters based on rows!!! just remember that WHERE filters before the data is grouped and then HAVING filters after the data is grouped. Rows will be eliminated by the WHERE clause and those will be included in the GROUP BY clause. This is just important to know when you should use WHERE versus HAVING.
+
+
+Another thing to note when you're working with GROUP BYs is that it's always good practice to use the order by clause. The GROUP BY does not sort the data in any fashion.
+
+
+
+```{sql connection=}
+SELECT SupplierID, COUNT(*) AS Num_Prod
+FROM Products
+WHERE UnitPrice >= 4
+GROUP BY SupplierID
+HAVING COUNT (*) >= 2;
+```
+
+# 08. Putting it all together
+
+This just gives you a really nice structured outline for a lot of the common statements and clauses you'll be using and the order that they should be in when writing SQL statements.
+
+```{r}
+knitr::include_graphics("sql_key_clauses.PNG")
+```
+
